@@ -1,0 +1,176 @@
+﻿<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Canvas刀枪不入躲避小游戏代码 - A5源码</title>
+
+    <style>
+        strong {
+            font-weight: bold;
+        }
+
+        body {
+            overflow: hidden;
+            font-family: 'Comfortaa', cursive;
+            font-size: 11px;
+        }
+
+        canvas {
+            border: 1px solid red;
+            background-image: url(map.png);
+            background-position-x: initial;
+            background-position-y: initial;
+            background-size: cover;
+            background-repeat-x: initial;
+            background-repeat-y: initial;
+            background-attachment: initial;
+            background-origin: initial;
+            background-clip: initial;
+            background-position: center;
+            font-family: 'Comfortaa', cursive;
+            position: relative;
+            width: 1000px;
+            height: 500px;
+        }
+
+
+    </style>
+
+</head>
+<body>
+<canvas id='world'></canvas>
+<script>
+    var moveToRightInterval=null;
+    var area = ["十堰市", "荆门市", "黄冈市", "恩施自治区", "宜昌", "武汉", "荆州市"];
+    var position = [
+        [55, 5],
+        [130, 5],
+        [250, 20],
+        [40, 70],
+        [125, 70],
+        [220, 70],
+        [125, 120]
+    ];
+    function get_xy(name) {
+
+        for (var i = 0; i < area.length; i++) {
+            if (name === area[i]) {
+                return position[i];
+            }
+
+        }
+        return -1;
+    }
+    function move(xy,xys) {
+        console.log("1212")
+        var canvas = document.getElementById('world');
+        var context = canvas.getContext('2d');
+        var pic1 = new Image();
+        pic1.src = "tb.png";//图片路径可以更改
+        function drawMoveToRight(x, y) {
+            context.drawImage(pic1, x, y, 15, 15);
+        }
+        //移动速度控制
+        moveToRightInterval = setInterval(load, 100);
+        var temp_x = xy[0];
+        var temp_y = xy[1];
+
+        function load() {
+
+            if (temp_x < xys[0]) {
+                temp_x += 1;
+            } else {
+                if (temp_x >= xys[0]) {
+                    temp_x -= 1;
+                }
+
+            }
+            if (temp_x == xys[0]) {
+                clearInterval(moveToRightInterval);
+                 moveToRightInterval=null;
+                console.log("sisi----------")
+
+            }
+            if (temp_y < xys[1]) {
+                temp_y += Math.abs(xy[1] - xys[1]) / Math.abs(xy[0] - xys[0])
+            }
+            else {
+                if (temp_y >= xys[1]) {
+                    temp_y -= Math.abs(xy[1] - xys[1]) / Math.abs(xy[0] - xys[0]);
+                }
+
+            }
+            context.clearRect(0, 0, canvas.width, canvas.height);//清除画布
+            drawMoveToRight(temp_x, temp_y);//向右移动，并绘制图形
+
+
+        }
+
+
+    }
+
+
+
+
+    //------------------------ajax提交---------------------------
+    /* 创建 XMLHttpRequest 对象 */
+    var xmlHttp;
+    function GetXmlHttpObject(){
+        if (window.XMLHttpRequest){
+            // code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp=new XMLHttpRequest();
+        }else{// code for IE6, IE5
+            xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        return xmlhttp;
+    }
+    // -----------ajax方法-----------//
+    function getLabelsGet(){
+        xmlHttp=GetXmlHttpObject();
+        if (xmlHttp==null){
+            alert('您的浏览器不支持AJAX！');
+            return;
+        }
+
+        var url="api.php?json=json";
+        xmlHttp.open("GET",url,true);
+        xmlHttp.onreadystatechange=getOkGet;//发送事件后，收到信息了调用函数
+        xmlHttp.send();
+    }
+    function getOkGet(){
+        if(xmlHttp.readyState==1||xmlHttp.readyState==2||xmlHttp.readyState==3){
+            // 本地提示：加载中
+        }
+        if (xmlHttp.readyState==4 && xmlHttp.status==200){
+            var d= xmlHttp.responseText;
+            // 处理返回结果
+            d=d.split(",");
+                var i=0;
+                var ds=window.setInterval(showalert, 10);
+                function showalert()
+                {
+                    if (i + 1 > d.length) {
+                       clearInterval(ds)
+                        i=0;
+                    }
+                    if(moveToRightInterval==null) {
+                        xy = get_xy(d[i]);
+                        xys = get_xy(d[i + 1]);
+                        console.log(d[i]);
+                        move(xy, xys);
+                        i++;
+                    }
+                }
+
+
+
+        }
+    }
+
+    getLabelsGet();
+
+
+</script>
+
+</body>
+</html>
